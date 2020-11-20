@@ -13,9 +13,9 @@ pub trait SimpleErc20Token {
     #[storage_set("total_supply")]
     fn set_total_supply(&self, total_supply: &BigUint);
 
-    #[view(getName)]
-    #[storage_get("name")]
-    fn get_name(&self) -> Vec<u8>;
+    #[view(nameOf)]
+    #[storage_get_mut("name")]
+    fn get_mut_name(&self) -> mut_storage!(Vec<u8>);
     #[storage_set("name")]
     fn set_name(&self, name: &[u8]);
 
