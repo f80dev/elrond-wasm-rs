@@ -2,6 +2,8 @@
 
 imports!();
 
+mod token;
+
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
 pub trait NonFungibleTokens {
 	#[init]
@@ -87,6 +89,10 @@ pub trait NonFungibleTokens {
 
 	// private methods
 
+	fn get_token_content(&self,token_id:u64) {
+
+	}
+
 	fn perform_mint(&self, count: u64, new_token_owner: &Address) {
 		let new_owner_current_total = self.get_token_count(new_token_owner);
 		let total_minted = self.get_total_minted();
@@ -138,6 +144,7 @@ pub trait NonFungibleTokens {
 	#[storage_set("owner")]
 	fn set_owner(&self, owner: &Address);
 
+
 	#[view(totalMinted)]
 	#[storage_get("totalMinted")]
 	fn get_total_minted(&self) -> u64;
@@ -148,24 +155,25 @@ pub trait NonFungibleTokens {
 	#[view(tokenOwner)]
 	#[storage_get("tokenOwner")]
 	fn get_token_owner(&self, token_id: u64) -> Address;
-
 	#[storage_set("tokenOwner")]
 	fn set_token_owner(&self, token_id: u64, owner: &Address);
+
 
 	#[view(tokenCount)]
 	#[storage_get("tokenCount")]
 	fn get_token_count(&self, owner: &Address) -> u64;
-
 	#[storage_set("tokenCount")]
 	fn set_token_count(&self, owner: &Address, token_count: u64);
+
+
 
 	#[storage_is_empty("approval")]
 	fn approval_is_empty(&self, token_id: u64) -> bool;
 
+
 	#[view(approval)]
 	#[storage_get("approval")]
 	fn get_approval(&self, token_id: u64) -> Address;
-
 	#[storage_set("approval")]
 	fn set_approval(&self, token_id: u64, approved_address: &Address);
 }
