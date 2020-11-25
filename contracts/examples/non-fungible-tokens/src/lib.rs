@@ -1,15 +1,16 @@
 #![no_std]
 
+use elrond_wasm::imports;
 imports!();
 
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
 pub trait NonFungibleTokens {
 	#[init]
-	fn init(&self, tokens: &Vec<u8> ) {
+	fn init(&self, initial_minted: u64,token_uri: &Vec<u8> ) {
 		let owner = self.get_caller();
-
 		self.set_owner(&owner);
-		self.perform_mint(tokens, &owner);
+		self.perform_mint(initial_minted, &owner,token_uri);
+
 	}
 
 	// endpoints
@@ -17,13 +18,13 @@ pub trait NonFungibleTokens {
 	/// Creates new tokens and sets their ownership to the specified account.
 	/// Only the contract owner may call this function.
 	#[endpoint]
-	fn mint(&self, count: u64, new_token_owner: &Address) -> SCResult<()> {
+	fn mint(&self, count: u64, new_token_owner: &Address, new_token_uri: &Vec<u8>) -> SCResult<()> {
 		require!(
 			self.get_caller() == self.get_owner(),
 			"Only owner can mint new tokens!"
 		);
 
-		self.perform_mint(count, new_token_owner);
+		self.perform_mint(count, new_token_owner,new_token_uri);
 
 		Ok(())
 	}
@@ -86,14 +87,8 @@ pub trait NonFungibleTokens {
 	}
 
 	// private methods
-
-	fn get_token_content(&self,token_id:u64) {
-
-	}
-
-	fn perform_mint(&self, tokens: &Vec<u8>, new_token_owner: &Address) {
+	fn perform_mint(&self, count:u64, new_token_owner: &Address, new_token_uri: &Vec<u8>) {
 		let new_owner_current_total = self.get_token_count(new_token_owner);
-		let count=1;
 		let total_minted = self.get_total_minted();
 		let first_new_id = total_minted;
 		let last_new_id = total_minted + count;
@@ -104,6 +99,7 @@ pub trait NonFungibleTokens {
 
 		self.set_total_minted(total_minted + count);
 		self.set_token_count(new_token_owner, new_owner_current_total + count);
+		self.set_token_uri(new_token_owner,new_token_uri);
 	}
 
 	fn perform_revoke_approval(&self, token_id: u64) {
@@ -123,6 +119,11 @@ pub trait NonFungibleTokens {
 		self.set_token_owner(token_id, to);
 	}
 
+
+
+
+
+
 	// Storage
 
 	/// Constructs the final key from `key_parts` and clears the storage value addressed by it.  
@@ -135,6 +136,7 @@ pub trait NonFungibleTokens {
 
 		self.storage_store_slice_u8(&final_key, &Vec::new());
 	}
+
 
 	#[view(contractOwner)]
 	#[storage_get("owner")]
@@ -163,6 +165,13 @@ pub trait NonFungibleTokens {
 	fn get_token_count(&self, owner: &Address) -> u64;
 	#[storage_set("tokenCount")]
 	fn set_token_count(&self, owner: &Address, token_count: u64);
+
+
+	#[view(tokenURI)]
+	#[storage_get("tokenURI")]
+	fn get_token_uri(&self, owner: &Address) -> Vec<u8>;
+	#[storage_set("tokenURI")]
+	fn set_token_uri(&self, owner: &Address, new_token_uri:  &Vec<u8>);
 
 
 

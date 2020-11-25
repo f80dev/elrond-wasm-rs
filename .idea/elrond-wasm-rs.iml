@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/adder/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/adder/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/elrond-wasm/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/elrond-codec/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/elrond-wasm-debug/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/elrond-wasm-debug/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/mandos/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mandos/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/elrond-wasm-derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/adder/debug/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/async/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/async/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/async/async-alice/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/async/async-bob/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/basic-features/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/basic-features/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-egld/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-egld/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-erc20/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-erc20/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/simple-erc20/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/simple-erc20/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-esdt/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crowdfunding-esdt/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crypto-bubbles/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/crypto-bubbles/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/modules/elrond-wasm-module-features/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/modules/elrond-wasm-module-pause/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/factorial/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/factorial/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-egld/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-egld/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-erc20/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-erc20/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-esdt/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/lottery-esdt/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/non-fungible-tokens/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/examples/non-fungible-tokens/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/benchmarks/str-repeat/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/benchmarks/str-repeat/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/use-module/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/contracts/feature-tests/use-module/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
