@@ -42,7 +42,6 @@ pub trait SimpleErc20Token {
     #[view(allowance)]
     #[storage_get_mut("allowance")]
     fn get_mut_allowance(&self, owner: &Address, spender: &Address) -> mut_storage!(BigUint);
-
     #[storage_set("allowance")]
     fn set_allowance(&self, owner: &Address, spender: &Address, allowance: &BigUint);
 

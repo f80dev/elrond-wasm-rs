@@ -2,16 +2,14 @@
 
 imports!();
 
-mod token;
-
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
 pub trait NonFungibleTokens {
 	#[init]
-	fn init(&self, initial_minted: u64) {
+	fn init(&self, tokens: &Vec<u8> ) {
 		let owner = self.get_caller();
 
 		self.set_owner(&owner);
-		self.perform_mint(initial_minted, &owner);
+		self.perform_mint(tokens, &owner);
 	}
 
 	// endpoints
@@ -93,8 +91,9 @@ pub trait NonFungibleTokens {
 
 	}
 
-	fn perform_mint(&self, count: u64, new_token_owner: &Address) {
+	fn perform_mint(&self, tokens: &Vec<u8>, new_token_owner: &Address) {
 		let new_owner_current_total = self.get_token_count(new_token_owner);
+		let count=1;
 		let total_minted = self.get_total_minted();
 		let first_new_id = total_minted;
 		let last_new_id = total_minted + count;
