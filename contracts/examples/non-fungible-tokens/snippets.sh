@@ -4,47 +4,28 @@
 USERS="../PEM"
 PROJECT="."
 ALICE="${USERS}/alice.pem"
+BOB="${USERS}/bob.pem"
 ADDRESS=$(erdpy data load --key=address)
 DEPLOY_TRANSACTION=$(erdpy data load --key=deployTransaction)
-ARGUMENTS="10 4564"
+ARGUMENTS=""
 PROXY=https://testnet-api.elrond.com
-erdpy contract deploy --project=${PROJECT} --proxy http://161.97.75.165:7950 --arguments ${ARGUMENTS} --recall-nonce --pem=${ALICE} --gas-limit=50000000 --send --outfile="deploy.json"
-
-
-configTestnet() {
-  erdpy testnet prerequisites
-  erdpy config set chainID local-testnet
-  erdpy config set proxy ${PROXY}
-  rm testnet.toml
-  echo "[networking]" >> testnet.toml
-  echo "post_proxy = 7950" >> testnet.toml
-  erdpy testnet config
-}
-
-
-testnet(){
-  erdpy testnet start
-}
-
-
-newDeploy() {
-  echo "test de déploiement"
-  erdpy contract deploy --project=${PROJECT} --proxy ${PROXY} --arguments ${ARGUMENTS} --recall-nonce --pem=${ALICE} --gas-limit=50000000 --send --outfile="deploy.json"
-}
+#PROXY=http://161.97.75.165:7950
 
 
 deploy() {
-    erdpy contract deploy --project=${PROJECT} --proxy ${PROXY} --arguments ${ARGUMENTS} --recall-nonce --pem=${ALICE} --gas-limit=50000000 --send --outfile="deploy.json"
+    clear
+    erdpy contract deploy --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
 
-    TRANSACTION=$(erdpy data parse --file="deploy.json" --expression="data['result']['hash']")
+
+    TRANSACTION=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['hash']")
     ADDRESS=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['address']")
 
     erdpy data store --key=address --value=${ADDRESS}
     erdpy data store --key=deployTransaction --value=${TRANSACTION}
 
     echo ""
-    echo "Smart contract address: ${ADDRESS}"
-    checkDeployment
+    echo "Transaction https://testnet-explorer.elrond.com/transactions/${TRANSACTION}"
+    echo "Smart contract address: https://testnet-explorer.elrond.com/address/${ADDRESS}"
 }
 
 
@@ -56,27 +37,50 @@ build(){
 }
 
 
+infos(){
+  erdpy account get --proxy ${PROXY} --address ${ADDRESS} --omit-fields=code
+}
+
+mint(){
+  clear
+  echo "Tests sur ${PROXY}"
+
+  echo "Minage du token"
+  ARGUMENTS="10 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 409600 1000000"
+  erdpy --verbose contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=8000000 --function="mint" --send
+
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 1
+}
+
+infos(){
+  clear
+  echo "URI du token 1"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY}  --arguments 1 --function="tokenURI"
+
+  echo "Price du token 1"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY}  --arguments 1 --function="tokenPrice"
+}
+
+buy(){
+  clear
+  echo "Achat d'un token"
+  erdpy --verbose contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${BOB} --arguments 1 --value 1 --gas-limit=8000000 --function="buy" --send
+}
+
+transfert(){
+  clear
+  echo "Achat d'un token"
+  erdpy --verbose contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${BOB} --arguments 1 --value 1 --gas-limit=8000000 --function="buy" --send
+}
+
+
 checkDeployment() {
+    echo ""
+    echo ""
+    echo "Vérification du déploiement sur ${PROXY}"
     erdpy tx get --proxy ${PROXY} --hash=$DEPLOY_TRANSACTION --omit-fields="['data', 'signature']"
     erdpy account get --proxy ${PROXY} --address=$ADDRESS --omit-fields="['code']"
 }
 
-info() {
-  echo "Contrat ${ADDRESS}"
-  erdpy contract query ${ADDRESS} --function="totalSupply"
-}
 
-transfer() {
-  echo "Contrat ${ADDRESS}"
-  erdpy --verbose contract call ${ADDRESS} --recall-nonce --pem=${ALICE} --arguments "erd1kyaqzaprcdnv4luvanah0gfxzzsnpaygsy6pytrexll2urtd05ts9vegu7" --gas-limit=5000000 --function="tranfer" --send
-}
-
-balance() {
-  echo "Contrat ${ADDRESS}"
-  erdpy --verbose contract query ${ADDRESS} --arguments "0x1e8a8b6b49de5b7be10aaa158a5a6a4abb4b56cc08f524bb5e6cd5f211ad3e13" --function="balanceOf"
-}
-
-checkDeployment() {
-    erdpy tx get --hash=$DEPLOY_TRANSACTION --omit-fields="['data', 'signature']"
-    erdpy account get --address=$ADDRESS --omit-fields="['code']"
-}
