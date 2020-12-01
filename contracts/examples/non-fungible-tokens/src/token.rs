@@ -2,7 +2,6 @@ use elrond_wasm::elrond_codec::*;
 use elrond_wasm::{Address, BigUintApi, Vec};
 
 
-
 pub struct Token<BigUint: BigUintApi> {
      pub owner: Address,
      pub price: BigUint,

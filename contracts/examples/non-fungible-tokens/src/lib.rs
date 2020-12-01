@@ -1,9 +1,10 @@
 #![no_std]
 
+imports!();
+
 mod token;
 use token::Token;
-
-imports!();
+use elrond_wasm::elrond_codec::TypeInfo::BigUint;
 
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
 pub trait NonFungibleTokens {
@@ -18,12 +19,11 @@ pub trait NonFungibleTokens {
 	/// Creates new tokens and sets their ownership to the specified account.
 	/// Only the contract owner may call this function.
 	#[endpoint]
-	fn mint(&self, count: u64, new_token_owner: Option<Address>, new_token_uri: Option<Vec<u8>>, new_token_price: Option<BigUint>) -> SCResult<()> {
+	fn mint(&self, count: u64, new_token_owner: Option<Address>, new_token_uri: Option<Vec<u8>>, new_token_price: BigUint) -> SCResult<()> {
 		require!(
 			self.get_caller() == self.get_owner(),
 			"Only owner can mint new tokens!"
 		);
-
 
 		self.perform_mint(count, new_token_owner, new_token_uri, new_token_price);
 		Ok(())
@@ -88,9 +88,8 @@ pub trait NonFungibleTokens {
 	}
 
 	// private methods
-	fn perform_mint(&self, count:u64, new_token_owner: Option<Address>, new_token_uri: Option<Vec<u8>>, new_token_price: Option<BigUint>) {
+	fn perform_mint(&self, count:u64, new_token_owner: Option<Address>, new_token_uri: Option<Vec<u8>>, new_token_price: BigUint) {
 		let tmp_uri=new_token_uri.unwrap();
-		let tmp_price=new_token_price.unwrap();
 		let tmp_owner=new_token_owner.unwrap();
 
 		let new_owner_current_total = self.get_token_count(&tmp_owner);
@@ -99,12 +98,9 @@ pub trait NonFungibleTokens {
 		let last_new_id = total_minted + count;
 
 
-
 		for id in first_new_id..last_new_id {
-			let token = Token {
-				owner: tmp_owner,
-				price: tmp_price,
-				uri: tmp_uri
+			let t = Token {
+				tmp_owner,new_token_price,tmp_uri
 			};
 
 			self.set_token(id, &token);
