@@ -13,7 +13,6 @@ pub trait NonFungibleTokens {
 		let owner = self.get_caller();
 		self.set_owner(&owner);
 		self.set_total_minted(0);
-		self.set_token_count(&owner,0);
 	}
 
 	// endpoints
@@ -186,10 +185,10 @@ pub trait NonFungibleTokens {
 
 
 	#[view(totalMinted)]
-	#[storage_get("minted")]
+	#[storage_get("totalMinted")]
 	fn get_total_minted(&self) -> u64;
-	#[storage_set("minted")]
-	fn set_total_minted(&self, total_minted: u64);
+	#[storage_set("totalMinted")]
+	fn set_total_minted(&self, totalMinted: u64);
 
 
 	#[view(tokenCount)]
