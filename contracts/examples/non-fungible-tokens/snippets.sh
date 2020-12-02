@@ -13,9 +13,10 @@ PROXY=https://testnet-api.elrond.com
 
 
 deploy() {
-    clear
-    erdpy contract deploy --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
+    build
 
+    clear
+    erdpy contract deploy --metadata-payable --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
 
     TRANSACTION=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['hash']")
     ADDRESS=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['address']")
@@ -33,39 +34,41 @@ build(){
   rm ./output/*
   erdpy --verbose contract build
   ls -l ./output
-  deploy
 }
 
 
-infos(){
-  erdpy account get --proxy ${PROXY} --address ${ADDRESS} --omit-fields=code
-}
 
 mint(){
   clear
-  echo "Tests sur ${PROXY}"
-
   echo "Minage du token"
-  ARGUMENTS="10 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 409600 1000000"
-  erdpy --verbose contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=8000000 --function="mint" --send
-
-  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 1
+  ARGUMENTS="10 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 0x40945465600 1"
+  erdpy contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=8000000 --function="mint" --send
 }
+
+
 
 infos(){
   clear
-  echo "URI du token 1"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY}  --arguments 1 --function="tokenURI"
 
-  echo "Price du token 1"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY}  --arguments 1 --function="tokenPrice"
+  echo ""
+  echo "total minted"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
+
+  echo ""
+  echo "TokenOwner"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 1
+
+  echo ""
+  echo "renseignement sur token 0"
+  erdpy --verbose contract query ${ADDRESS} --proxy ${PROXY}  --function="getToken" --arguments 1
 }
+
+
 
 buy(){
   clear
   echo "Achat d'un token"
-  erdpy --verbose contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${BOB} --arguments 1 --value 1 --gas-limit=8000000 --function="buy" --send
+  erdpy contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${BOB} --arguments 1 --value 1 --gas-limit=8000000 --function="buy" --send
 }
 
 transfert(){

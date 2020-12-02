@@ -76,12 +76,10 @@ pub trait Lottery {
 		require!(!lottery_name.is_empty(), "Name can't be empty!");
 
 		let timestamp = self.get_block_timestamp();
-
 		let total_tickets = opt_total_tickets.unwrap_or(MAX_TICKETS);
 		let deadline = opt_deadline.unwrap_or_else(|| timestamp + THIRTY_DAYS_IN_SECONDS);
 		let max_entries_per_user = opt_max_entries_per_user.unwrap_or(MAX_TICKETS);
-		let prize_distribution =
-			opt_prize_distribution.unwrap_or_else(|| [PERCENTAGE_TOTAL as u8].to_vec());
+		let prize_distribution = opt_prize_distribution.unwrap_or_else(|| [PERCENTAGE_TOTAL as u8].to_vec());
 		let whitelist = opt_whitelist.unwrap_or(Vec::new());
 
 		require!(
