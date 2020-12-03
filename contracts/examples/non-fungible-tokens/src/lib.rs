@@ -4,7 +4,6 @@ imports!();
 
 mod token;
 use token::Token;
-use core::borrow::Borrow;
 
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
 pub trait NonFungibleTokens {
@@ -20,15 +19,21 @@ pub trait NonFungibleTokens {
 	/// Creates new tokens and sets their ownership to the specified account.
 	/// Only the contract owner may call this function.
 	#[endpoint]
-	fn mint(&self, count: u64, new_token_owner: &Address, new_token_uri: Option<Vec<u8>>, new_token_price: BigUint) -> SCResult<()> {
+	fn mint(&self, count: u64, new_token_owner: &Address, new_token_uri: &Vec<u8>, new_token_price: BigUint) -> SCResult<()> {
 		require!(
 			self.get_caller() == self.get_owner(),
 			"Only owner can mint new tokens!"
 		);
 
+		require!(
+			count>0,
+			"Au moins un token doit être miné"
+		);
+
 		self.perform_mint(count, new_token_owner, new_token_uri, new_token_price);
 		Ok(())
 	}
+
 
 	/// Approves an account to transfer the token on behalf of its owner.<br>
 	/// Only the owner of the token may call this function.
@@ -52,10 +57,7 @@ pub trait NonFungibleTokens {
 	#[endpoint]
 	fn revoke(&self, token_id: u64) -> SCResult<()> {
 		require!(token_id < self.get_total_minted(), "Token does not exist!");
-		require!(
-			self.get_caller() == self.get_token_owner(token_id),
-			"Only the token owner can revoke approval!"
-		);
+		require!(self.get_caller() == self.get_token_owner(token_id),"Only the token owner can revoke approval!");
 
 		if !self.approval_is_empty(token_id) {
 			self.perform_revoke_approval(token_id);
@@ -63,6 +65,7 @@ pub trait NonFungibleTokens {
 
 		Ok(())
 	}
+
 
 
 	/// Transfer ownership of the token to a new account.
@@ -88,20 +91,21 @@ pub trait NonFungibleTokens {
 		sc_error!("Only the owner or the approved account may transfer the token!")
 	}
 
-	// private methods
-	fn perform_mint(&self, count:u64, new_token_owner: &Address, new_token_uri: Option<Vec<u8>>, new_token_price: BigUint) {
 
+
+
+	// private methods
+	fn perform_mint(&self, count:u64, new_token_owner: &Address, new_token_uri: &Vec<u8>, new_token_price: BigUint) {
 		let new_owner_current_total = self.get_token_count(new_token_owner);
 		let total_minted = self.get_total_minted();
 		let first_new_id = total_minted;
 		let last_new_id = total_minted + count;
 
 
-
 		for id in first_new_id..last_new_id {
 			let token = Token {
 				price:new_token_price.clone(),
-				uri:new_token_uri.borrow().as_ref().unwrap().to_vec()
+				uri:new_token_uri.to_vec()
 			};
 
 			self.set_token(id, &token);
@@ -141,19 +145,14 @@ pub trait NonFungibleTokens {
 	fn buy(&self, #[payment] payment: BigUint, token_id: u64) -> SCResult<()> {
 		let caller = self.get_caller();
 		let token = self.get_mut_token(token_id);
-		if payment > token.price {
-			self.set_approval(token_id,&caller);
-		}
+
+		require!(payment > token.price,"Montant inferieur au prix");
+
+		self.set_approval(token_id,&caller);
 		return Ok(());
 	}
 
 
-	// #[view]
-	// fn get_token_info(&self,token_id: u64) -> Vec<u8> {
-	// 	let price=self.get_token_price(token_id);
-	// 	let uri=self.get_token_uri(token_id);
-	// 	let owner=self.get_token_owner(token_id);
-	// }
 
 	// Storage
 
@@ -187,8 +186,9 @@ pub trait NonFungibleTokens {
 	#[view(totalMinted)]
 	#[storage_get("totalMinted")]
 	fn get_total_minted(&self) -> u64;
+
 	#[storage_set("totalMinted")]
-	fn set_total_minted(&self, totalMinted: u64);
+	fn set_total_minted(&self, total_minted: u64);
 
 
 	#[view(tokenCount)]
@@ -198,14 +198,11 @@ pub trait NonFungibleTokens {
 	fn set_token_count(&self, owner: &Address, token_count: u64);
 
 
-
 	#[view(getToken)]
 	#[storage_get_mut("token")]
 	fn get_mut_token(&self,  token_id: u64) -> mut_storage!(Token<BigUint>);
 	#[storage_set("token")]
 	fn set_token(&self, token_id: u64, token: &Token<BigUint>);
-
-
 
 
 

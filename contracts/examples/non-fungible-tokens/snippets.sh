@@ -41,8 +41,8 @@ build(){
 mint(){
   clear
   echo "Minage du token"
-  ARGUMENTS="10 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 0x40945465600 1"
-  erdpy contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=8000000 --function="mint" --send
+  ARGUMENTS="10 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 0x960544564523145445453414124174 1"
+  erdpy contract call ${ADDRESS} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=80000000 --function="mint" --send
 }
 
 
@@ -51,16 +51,24 @@ infos(){
   clear
 
   echo ""
+  echo "Contract owner"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="contractOwner"
+
+  echo ""
   echo "total minted"
   erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
 
   echo ""
+  echo "TokenCount"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenCount" --arguments 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1
+
+  echo ""
   echo "TokenOwner"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 1
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 0
 
   echo ""
   echo "renseignement sur token 0"
-  erdpy --verbose contract query ${ADDRESS} --proxy ${PROXY}  --function="getToken" --arguments 1
+  erdpy --verbose contract query ${ADDRESS} --proxy ${PROXY}  --function="getToken" --arguments 0
 }
 
 
