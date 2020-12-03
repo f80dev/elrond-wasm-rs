@@ -1,5 +1,6 @@
 #sed 's/\r$//' snippets.sh
 #cd dev/contracts/examples/non-fungible-tokens
+#source snippets.sh && deploy
 
 USERS="../PEM"
 PROJECT="."
@@ -57,10 +58,6 @@ infos(){
   echo ""
   echo "total minted"
   erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
-
-  echo ""
-  echo "TokenCount"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenCount" --arguments 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1
 
   echo ""
   echo "TokenOwner"

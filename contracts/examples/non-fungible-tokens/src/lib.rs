@@ -105,7 +105,8 @@ pub trait NonFungibleTokens {
 		for id in first_new_id..last_new_id {
 			let token = Token {
 				price:new_token_price.clone(),
-				uri:new_token_uri.to_vec()
+				uri:new_token_uri.to_vec(),
+				state:0
 			};
 
 			self.set_token(id, &token);
@@ -144,11 +145,19 @@ pub trait NonFungibleTokens {
 	#[endpoint]
 	fn buy(&self, #[payment] payment: BigUint, token_id: u64) -> SCResult<()> {
 		let caller = self.get_caller();
-		let token = self.get_mut_token(token_id);
+		let mut token = self.get_mut_token(token_id);
 
-		require!(payment > token.price,"Montant inferieur au prix");
+		let owner=self.get_token_owner(token_id);
 
-		self.set_approval(token_id,&caller);
+		require!(owner != caller,"Ce token vous appartient déjà");
+		require!(token.state == 0,"Ce token n'est pas en vente");
+		require!(payment >= token.price,"Montant inferieur au prix");
+
+		token.state=1;
+
+		self.set_token(token_id,&token);
+
+		self.perform_transfer(token_id,&owner,&caller);
 		return Ok(());
 	}
 
