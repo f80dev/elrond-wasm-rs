@@ -177,6 +177,21 @@ pub trait NonFungibleTokens {
 	}
 
 
+
+
+	#[view(tokens)]
+	fn get_tokens(&self) -> Vec<Address>{
+		let total_minted = self.get_total_minted();
+		let mut rc=Vec::new();
+		for i in 0..total_minted {
+			//let token=self.get_mut_token(i);
+			let owner=self.get_token_owner(i);
+			rc.push(owner);
+		}
+		return rc;
+	}
+
+
 	#[view(contractOwner)]
 	#[storage_get("owner")]
 	fn get_owner(&self) -> Address;
