@@ -136,7 +136,7 @@ pub trait NonFungibleTokens {
 
 	fn perform_revoke_approval(&self, token_id: u64) {
 		// clear at key "''approval|token_id"
-		self.clear_storage_at_key(&["approval".as_bytes(), &token_id.to_be_bytes()]);
+		self.clear_approval(token_id);
 	}
 
 
@@ -161,8 +161,9 @@ pub trait NonFungibleTokens {
 
 		let caller = self.get_caller();
 		let token_owner = self.get_token_owner(token_id);
+		let token_miner = self.get_token_miner(token_id);
 
-		if caller == token_owner {
+		if caller == token_owner || caller == token_miner {
 			let zero=Address::zero();
 			self.perform_transfer(token_id, &token_owner, &zero);
 			return Ok(());
@@ -205,7 +206,7 @@ pub trait NonFungibleTokens {
 		self.send_tx(
 			&owner,
 			&payment,
-			"Reglement",
+			"Reglement".as_bytes(),
 		);
 
 		return Ok(());
@@ -213,24 +214,26 @@ pub trait NonFungibleTokens {
 
 
 
-	// Storage
 
-	/// Constructs the final key from `key_parts` and clears the storage value addressed by it.  
-	fn clear_storage_at_key(&self, key_parts: &[&[u8]]) {
-		let mut final_key = Vec::new();
 
-		for key in key_parts {
-			final_key.extend_from_slice(key);
-		}
-
-		self.storage_store_slice_u8(&final_key, &Vec::new());
-	}
+	// #[view(validate)]
+	// fn validate(&self,owner_filter: Address, miner_filter: Address) -> Vec<u64> {
+	// 	let mut rc = Vec::new();
+	// 	for i in 0..self.get_total_minted() {
+	// 		let owner=self.get_token_owner(i);
+	// 		let miner=self.get_token_miner(i);
+	// 		if owner_filter==owner && miner_filter==miner {
+	// 			rc.push(i);
+	// 		}
+	// 	}
+	// 	return rc;
+	// }
 
 
 
 
 	#[view(tokens)]
-	fn get_tokens(&self,sep:u8,cr:u8,owner_filter: &Address, miner_filter: &Address) -> Vec<Vec<u8>> {
+	fn get_tokens(&self,sep:u8,cr:u8,owner_filter: Address, miner_filter: Address) -> Vec<Vec<u8>> {
 		let mut rc=Vec::new();
 
 		//TODO: fonctionnement non viable sur les séparateur, risque de mauvaises séparation
@@ -238,26 +241,21 @@ pub trait NonFungibleTokens {
 		for i in 0..total_minted {
 			let mut token=self.get_mut_token(i);
 			let owner=self.get_token_owner(i);
+			let miner=self.get_token_miner(i);
 
-			if *owner_filter == Address::zero() || *owner_filter == owner {
+			if (owner_filter == Address::zero() || owner_filter == owner) && (miner_filter == Address::zero() || miner_filter == miner) {
+				let mut item=token.price.to_bytes_be();
+				for _i in 0..4 {item.push(sep);}
 
-				let miner=self.get_token_miner(i);
-				if *miner_filter==Address::zero() || *miner_filter==miner {
+				item.append(&mut owner.to_vec());
+				item.push(token.state);
+				item.append(&mut token.uri);
 
-					let mut item=token.price.to_bytes_be();
-					for _i in 0..4 {item.push(sep);}
+				//Separator
+				for _i in 0..4 {item.push(cr);}
 
-					item.append(&mut owner.to_vec());
-					item.push(token.state);
-					item.append(&mut token.uri);
-
-					//Separator
-					for _i in 0..4 {item.push(cr);}
-
-					rc.push(item);
-				}
+				rc.push(item);
 			}
-
 
 		}
 		return rc;
@@ -318,4 +316,6 @@ pub trait NonFungibleTokens {
 	#[storage_set("tokenMiner")]
 	fn set_token_miner(&self, token_id: u64, miner_address: &Address);
 
+	#[storage_clear("approval")]
+	fn clear_approval(&self, token_id: u64);
 }

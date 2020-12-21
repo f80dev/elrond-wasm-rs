@@ -1,6 +1,7 @@
 #sed 's/\r$//' snippets.sh
-#cd dev/contracts/examples/non-fungible-tokens
+#cd contracts/examples/non-fungible-tokens
 #source snippets.sh && deploy
+#source snippets.sh && infos
 
 USERS="../PEM"
 PROJECT="."
@@ -14,15 +15,15 @@ ARGUMENTS=""
 #PROXY=https://testnet-api.elrond.com
 #CHAINID="T"
 
-CHAINID="local-testnet"
 PROXY=http://161.97.75.165:7950
+CHAINID="local-testnet"
 
 
 deploy() {
     build
 
     clear
-    erdpy contract deploy --metadata-payable --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
+    erdpy --verbose contract deploy --chain ${CHAINID}  --metadata-payable --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
 
     TRANSACTION=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['hash']")
     ADDRESS=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['address']")
@@ -32,7 +33,9 @@ deploy() {
 
     echo ""
     echo "Transaction https://testnet-explorer.elrond.com/transactions/${TRANSACTION}"
+    echo "Transaction ${PROXY}/transaction/${TRANSACTION}"
     echo "Smart contract address: https://testnet-explorer.elrond.com/address/${ADDRESS}"
+    echo "Smart contract address: ${PROXY}/address/${ADDRESS}"
 }
 
 
@@ -70,21 +73,26 @@ setstate(){
 infos(){
   clear
 
-  echo ""
-  echo "Contract owner"
-  erdpy contract query ${ADDRESS}  --proxy ${PROXY} --function="contractOwner"
-
+#  echo ""
+#  echo "Contract owner"
+#  erdpy contract query ${ADDRESS}  --proxy ${PROXY} --function="contractOwner"
+#
   echo ""
   echo "total minted"
   erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
-
+#
   echo ""
-  echo "TokenOwner sur 0"
-  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 0
+  echo "miner of 1"
+  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenMiner" --arguments 0
 
+#  echo ""
+#  echo "TokenOwner sur 0"
+#  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 0
+  ARGUMENTS="170 255 0x0139472eff6886771a982f3083da5d431f24c29181e63888228dc81ca60d69e1 0x0000000000000000000000000000000000000000000000000000000000000000"
+  #ARGUMENTS="170 255 0x0 0x0"
   echo ""
   echo "recuperation des tokens sur ${ADDRESS}"
-  erdpy --verbose contract query ${ADDRESS} --proxy ${PROXY}  --function="tokens" --arguments 0xFF 0xAA 0 0
+  erdpy --verbose contract query ${ADDRESS} --proxy ${PROXY}  --function="tokens" --arguments ${ARGUMENTS}
 }
 
 
