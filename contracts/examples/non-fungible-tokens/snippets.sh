@@ -12,18 +12,18 @@ ADDRESS=$(erdpy data load --key=address)
 DEPLOY_TRANSACTION=$(erdpy data load --key=deployTransaction)
 ARGUMENTS=""
 
-#PROXY=https://testnet-api.elrond.com
-#CHAINID="T"
+PROXY=https://testnet-api.elrond.com
+CHAINID="T"
 
-PROXY=http://161.97.75.165:7950
-CHAINID="local-testnet"
+#PROXY=http://161.97.75.165:7950
+#CHAINID="local-testnet"
 
 
 deploy() {
     build
 
     clear
-    erdpy --verbose contract deploy --chain ${CHAINID}  --metadata-payable --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
+    erdpy contract deploy --chain ${CHAINID}  --metadata-payable --project=${PROJECT} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --gas-limit=80000000 --send --outfile="deploy.json"
 
     TRANSACTION=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['hash']")
     ADDRESS=$(erdpy data parse --file="deploy.json" --expression="data['emitted_tx']['address']")
@@ -31,7 +31,7 @@ deploy() {
     erdpy data store --key=address --value=${ADDRESS}
     erdpy data store --key=deployTransaction --value=${TRANSACTION}
 
-    echo ""
+    echo "si besoin https://testnet-wallet.elrond.com"
     echo "Transaction https://testnet-explorer.elrond.com/transactions/${TRANSACTION}"
     echo "Transaction ${PROXY}/transaction/${TRANSACTION}"
     echo "Smart contract address: https://testnet-explorer.elrond.com/address/${ADDRESS}"

@@ -19,12 +19,12 @@ pub trait NonFungibleTokens {
 	/// Creates new tokens and sets their ownership to the specified account.
 	/// Only the contract owner may call this function.
 	#[endpoint]
-	fn mint(&self, count: u64, new_token_owner: &Address, new_token_uri: &Vec<u8>,secret: &Vec<u8>, new_token_price: BigUint) -> SCResult<u64> {
+	fn mint(&self, count: u64, new_token_owner: Address, new_token_uri: &Vec<u8>,secret: &Vec<u8>, new_token_price: BigUint) -> SCResult<u64> {
 		require!(self.get_caller() == self.get_owner(),"Only owner can mint new tokens!");
 		require!(count>0,"At least one token must be mined");
 		require!(new_token_uri.len() > 0,"URI can't be empty");
 
-		let token_id=self.perform_mint(count, new_token_owner, new_token_uri, secret, new_token_price);
+		let token_id=self.perform_mint(count, &new_token_owner, new_token_uri, secret, new_token_price);
 		Ok(token_id)
 	}
 
@@ -32,11 +32,11 @@ pub trait NonFungibleTokens {
 	/// Approves an account to transfer the token on behalf of its owner.<br>
 	/// Only the owner of the token may call this function.
 	#[endpoint]
-	fn approve(&self, token_id: u64, approved_address: &Address) -> SCResult<()> {
+	fn approve(&self, token_id: u64, approved_address: Address) -> SCResult<()> {
 		require!(token_id < self.get_total_minted(), "Token does not exist!");
 		require!(self.get_caller() == self.get_token_owner(token_id),"Only the token owner can approve!");
 
-		self.set_approval(token_id, approved_address);
+		self.set_approval(token_id, &approved_address);
 
 		Ok(())
 	}
@@ -83,20 +83,20 @@ pub trait NonFungibleTokens {
 
 	/// Transfer ownership of the token to a new account.
 	#[endpoint]
-	fn transfer(&self, token_id: u64, to: &Address) -> SCResult<()> {
+	fn transfer(&self, token_id: u64, to: Address) -> SCResult<()> {
 		require!(token_id < self.get_total_minted(), "Token does not exist!");
 
 		let caller = self.get_caller();
 		let token_owner = self.get_token_owner(token_id);
 
 		if caller == token_owner {
-			self.perform_transfer(token_id, &token_owner, to);
+			self.perform_transfer(token_id, &token_owner, &to);
 			return Ok(());
 		} else if !self.approval_is_empty(token_id) {
 			let approved_address = self.get_approval(token_id);
 
 			if caller == approved_address {
-				self.perform_transfer(token_id, &token_owner, to);
+				self.perform_transfer(token_id, &token_owner, &to);
 				return Ok(());
 			}
 		}
@@ -165,6 +165,7 @@ pub trait NonFungibleTokens {
 
 		if caller == token_owner || caller == token_miner {
 			let zero=Address::zero();
+			self.set_token_miner(token_id,&zero);
 			self.perform_transfer(token_id, &token_owner, &zero);
 			return Ok(());
 		}
@@ -175,13 +176,12 @@ pub trait NonFungibleTokens {
 
 	#[endpoint]
 	fn setstate(&self,  token_id: u64,new_state:u8) -> SCResult<()> {
-		let caller = self.get_caller();
-		let mut token = self.get_mut_token(token_id);
-		let owner = self.get_token_owner(token_id);
+		require!(self.get_token_owner(token_id) == self.get_caller(),"Only token owner can change the state");
 
-		require!(owner == caller,"Only token owner can change the state");
+		let mut token = self.get_mut_token(token_id);
 		token.state=new_state;
 		self.set_token(token_id,&token);
+
 		Ok(())
 	}
 
@@ -189,14 +189,11 @@ pub trait NonFungibleTokens {
 	#[payable]
 	#[endpoint]
 	fn buy(&self, #[payment] payment: BigUint, token_id: u64) -> SCResult<()> {
-		let caller = self.get_caller();
-		let mut token = self.get_mut_token(token_id);
-		let owner = self.get_token_owner(token_id);
-
-		require!(owner != caller,"Ce token vous appartient déjà");
+		require!(self.get_token_owner(token_id) != self.get_caller(),"Ce token vous appartient déjà");
 		require!(token.state == 0,"Ce token n'est pas en vente");
 		require!(payment >= token.price,"Montant inferieur au prix");
 
+		let mut token = self.get_mut_token(token_id);
 		token.state=1;
 
 		self.set_token(token_id,&token);
@@ -214,24 +211,7 @@ pub trait NonFungibleTokens {
 
 
 
-
-
-	// #[view(validate)]
-	// fn validate(&self,owner_filter: Address, miner_filter: Address) -> Vec<u64> {
-	// 	let mut rc = Vec::new();
-	// 	for i in 0..self.get_total_minted() {
-	// 		let owner=self.get_token_owner(i);
-	// 		let miner=self.get_token_miner(i);
-	// 		if owner_filter==owner && miner_filter==miner {
-	// 			rc.push(i);
-	// 		}
-	// 	}
-	// 	return rc;
-	// }
-
-
-
-
+	
 	#[view(tokens)]
 	fn get_tokens(&self,sep:u8,cr:u8,owner_filter: Address, miner_filter: Address) -> Vec<Vec<u8>> {
 		let mut rc=Vec::new();

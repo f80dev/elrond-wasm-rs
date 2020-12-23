@@ -90,6 +90,10 @@ pub trait SimpleErc20Token {
         Ok(())
     }
 
+
+
+
+
     /// Transfer token to a specified address from sender.
     /// 
     /// Arguments:
@@ -102,7 +106,9 @@ pub trait SimpleErc20Token {
         let sender = self.get_caller();
         self.perform_transfer(sender, to, amount)
     }
- 
+
+
+
     /// Use allowance to transfer funds between two accounts.
     /// 
     /// Arguments:
@@ -130,6 +136,8 @@ pub trait SimpleErc20Token {
         // transfer
         self.perform_transfer(sender, recipient, amount)
     }
+
+
 
     /// Approve the given address to spend the specified amount of tokens on behalf of the sender.
     /// It overwrites any previously existing allowance from sender to beneficiary.
