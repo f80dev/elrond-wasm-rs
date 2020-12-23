@@ -83,7 +83,9 @@ pub trait SimpleErc20Token {
             let mut recipient_balance = self.get_mut_balance(&recipient);
             *recipient_balance += &amount; // saved automatically at the end of scope
         }
-    
+
+
+
         // log operation
         self.transfer_event(&sender, &recipient, &amount);
 
