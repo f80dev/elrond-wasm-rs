@@ -1,0 +1,27 @@
+[StakingSystemSCConfig]
+GenesisNodePrice = "2500000000000000000000"
+MinStakeValue = "100000000000000000000"
+UnBondPeriod = 250
+MinStepValue = "100000000000000000000"
+AuctionEnableEpoch = 100000
+StakeEnableEpoch = 0
+NumRoundsWithoutBleed = 100
+MaximumPercentageToBleed = 0.5
+BleedPercentagePerRound = 1e-5
+MaxNumberOfNodesForStake = 2169
+NodesToSelectInAuction = 2169
+UnJailValue = "2500000000000000000"
+ActivateBLSPubKeyMessageVerification = true
+
+[ESDTSystemSCConfig]
+BaseIssuingCost = "5000000000000000000"
+OwnerAddress = "erd1fpkcgel4gcmh8zqqdt043yfcn5tyx8373kg6q2qmkxzu4dqamc0swts65c"
+EnabledEpoch = 0
+
+[GovernanceSystemSCConfig]
+ProposalCost = "5000000000000000000"
+NumNodes = 500
+MinQuorum = 400
+MinPassThreshold = 300
+MinVetoThreshold = 50
+EnabledEpoch = 2

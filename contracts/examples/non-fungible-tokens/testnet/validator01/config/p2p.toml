@@ -1,0 +1,20 @@
+[Node]
+Port = "21501"
+Seed = ""
+ThresholdMinConnectedPeers = 1
+
+[KadDhtPeerDiscovery]
+Enabled = true
+RefreshIntervalInSec = 10
+ProtocolID = "/erd/kad/sandbox"
+InitialPeerList = [ "/ip4/127.0.0.1/tcp/9999/p2p/16Uiu2HAkw5SNNtSvH1zJiQ6Gc3WoGNSxiyNueRKe6fuAuh57G3Bk",]
+BucketSize = 100
+RoutingTableRefreshIntervalInSec = 300
+
+[Sharding]
+TargetPeerCount = 24
+MaxIntraShardValidators = 12
+MaxCrossShardValidators = 8
+MaxIntraShardObservers = 2
+MaxCrossShardObservers = 1
+Type = "NilListSharder"

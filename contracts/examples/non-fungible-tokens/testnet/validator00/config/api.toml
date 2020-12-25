@@ -1,0 +1,121 @@
+[APIPackages.node]
+[[APIPackages.node.Routes]]
+Name = "/status"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/metrics"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/heartbeatstatus"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/statistics"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/p2pstatus"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/debug"
+Open = true
+
+[[APIPackages.node.Routes]]
+Name = "/peerinfo"
+Open = true
+
+[APIPackages.address]
+[[APIPackages.address.Routes]]
+Name = "/:address"
+Open = true
+
+[[APIPackages.address.Routes]]
+Name = "/:address/balance"
+Open = true
+
+[[APIPackages.address.Routes]]
+Name = "/:address/username"
+Open = true
+
+[[APIPackages.address.Routes]]
+Name = "/:address/key/:key"
+Open = true
+
+[APIPackages.hardfork]
+[[APIPackages.hardfork.Routes]]
+Name = "/trigger"
+Open = true
+
+[APIPackages.network]
+[[APIPackages.network.Routes]]
+Name = "/status"
+Open = true
+
+[[APIPackages.network.Routes]]
+Name = "/economics"
+Open = true
+
+[[APIPackages.network.Routes]]
+Name = "/config"
+Open = true
+
+[APIPackages.log]
+[[APIPackages.log.Routes]]
+Name = "/log"
+Open = true
+
+[APIPackages.validator]
+[[APIPackages.validator.Routes]]
+Name = "/statistics"
+Open = true
+
+[APIPackages.vm-values]
+[[APIPackages.vm-values.Routes]]
+Name = "/hex"
+Open = true
+
+[[APIPackages.vm-values.Routes]]
+Name = "/string"
+Open = true
+
+[[APIPackages.vm-values.Routes]]
+Name = "/int"
+Open = true
+
+[[APIPackages.vm-values.Routes]]
+Name = "/query"
+Open = true
+
+[APIPackages.transaction]
+[[APIPackages.transaction.Routes]]
+Name = "/send"
+Open = true
+
+[[APIPackages.transaction.Routes]]
+Name = "/simulate"
+Open = true
+
+[[APIPackages.transaction.Routes]]
+Name = "/send-multiple"
+Open = true
+
+[[APIPackages.transaction.Routes]]
+Name = "/cost"
+Open = true
+
+[[APIPackages.transaction.Routes]]
+Name = "/:txhash"
+Open = true
+
+[APIPackages.block]
+[[APIPackages.block.Routes]]
+Name = "/by-nonce/:nonce"
+Open = true
+
+[[APIPackages.block.Routes]]
+Name = "/by-hash/:hash"
+Open = true
+
