@@ -189,11 +189,15 @@ pub trait NonFungibleTokens {
 	#[payable]
 	#[endpoint]
 	fn buy(&self, #[payment] payment: BigUint, token_id: u64) -> SCResult<()> {
-		require!(self.get_token_owner(token_id) != self.get_caller(),"Ce token vous appartient déjà");
+		let mut token = self.get_mut_token(token_id);
+		let owner=self.get_token_owner(token_id);
+		let caller=self.get_caller();
+
+		require!(owner != caller,"Ce token vous appartient déjà");
 		require!(token.state == 0,"Ce token n'est pas en vente");
 		require!(payment >= token.price,"Montant inferieur au prix");
 
-		let mut token = self.get_mut_token(token_id);
+
 		token.state=1;
 
 		self.set_token(token_id,&token);
