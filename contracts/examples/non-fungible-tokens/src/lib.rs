@@ -3,6 +3,7 @@
 imports!();
 
 mod token;
+
 use token::Token;
 
 #[elrond_wasm_derive::contract(NonFungibleTokensImpl)]
@@ -19,14 +20,16 @@ pub trait NonFungibleTokens {
 	/// Creates new tokens and sets their ownership to the specified account.
 	/// Only the contract owner may call this function.
 	#[endpoint]
-	fn mint(&self, count: u64, new_token_owner: Address, new_token_uri: &Vec<u8>,secret: &Vec<u8>, new_token_price: BigUint) -> SCResult<u64> {
+	fn mint(&self, count: u64, new_token_owner: Address, new_token_uri: &Vec<u8>,secret: &Vec<u8>, new_token_price: BigUint,update_price: u32) -> SCResult<u64> {
 		require!(self.get_caller() == self.get_owner(),"Only owner can mint new tokens!");
 		require!(count>0,"At least one token must be mined");
 		require!(new_token_uri.len() > 0,"URI can't be empty");
 
-		let token_id=self.perform_mint(count, &new_token_owner, new_token_uri, secret, new_token_price);
+		let token_id=self.perform_mint(count, &new_token_owner, new_token_uri, secret, new_token_price,update_price);
 		Ok(token_id)
 	}
+
+
 
 
 	/// Approves an account to transfer the token on behalf of its owner.<br>
@@ -57,6 +60,14 @@ pub trait NonFungibleTokens {
 		Ok(())
 	}
 
+	// fn decrypt(&self, encrypted:&Vec<u8>) -> Vec<u8> {
+	// 	let a:u8=12;
+	// 	for u in encrypted {
+	// 		u = &(u ^ a);
+	// 	}
+	// 	return encrypted.to_vec();
+	// }
+
 
 	#[endpoint]
 	fn open(&self, token_id: u64) -> SCResult<Vec<u8>> {
@@ -67,6 +78,8 @@ pub trait NonFungibleTokens {
 
 		let token=self.get_mut_token(token_id);
 		let secret=token.secret.to_vec();
+		//secret=self.decrypt(&secret);
+
 
 		if caller == token_owner {
 			return Ok(secret);
@@ -108,7 +121,7 @@ pub trait NonFungibleTokens {
 
 
 	// private methods
-	fn perform_mint(&self, count:u64, new_token_owner: &Address, new_token_uri: &Vec<u8>, secret: &Vec<u8>, new_token_price: BigUint) -> u64 {
+	fn perform_mint(&self, count:u64, new_token_owner: &Address, new_token_uri: &Vec<u8>, secret: &Vec<u8>, new_token_price: BigUint,update_price: u32) -> u64 {
 		let new_owner_current_total = self.get_token_count(new_token_owner);
 		let total_minted = self.get_total_minted();
 		let first_new_id = total_minted;
@@ -120,6 +133,7 @@ pub trait NonFungibleTokens {
 				uri:new_token_uri.to_vec(),
 				secret:secret.to_vec(),
 				state:0 as u8,
+				update_price:update_price,
 			};
 			self.set_token(id, &token);
 			self.set_token_owner(id,new_token_owner);
@@ -186,6 +200,24 @@ pub trait NonFungibleTokens {
 	}
 
 
+	#[endpoint]
+	fn price(&self, token_id: u64, new_price: BigUint) -> SCResult<()> {
+		let mut token = self.get_mut_token(token_id);
+
+		let owner = self.get_token_owner(token_id);
+		let caller = self.get_caller();
+		require!(owner != caller,"Seul le propriétaire du token peut modifier le prix");
+
+		// let up = BigUint::from(token.update_price);
+		// require!(new_price > token.price+up,"Vous ne pouvez autant modifier le prix");
+
+		token.price = new_price;
+		self.set_token(token_id,&token);
+
+		return Ok(())
+	}
+
+
 	#[payable]
 	#[endpoint]
 	fn buy(&self, #[payment] payment: BigUint, token_id: u64) -> SCResult<()> {
@@ -217,10 +249,9 @@ pub trait NonFungibleTokens {
 
 	
 	#[view(tokens)]
-	fn get_tokens(&self,sep:u8,cr:u8,owner_filter: Address, miner_filter: Address) -> Vec<Vec<u8>> {
+	fn get_tokens(&self,owner_filter: Address, miner_filter: Address) -> Vec<Vec<u8>> {
 		let mut rc=Vec::new();
 
-		//TODO: fonctionnement non viable sur les séparateur, risque de mauvaises séparation
 		let total_minted = self.get_total_minted();
 		for i in 0..total_minted {
 			let mut token=self.get_mut_token(i);
@@ -228,15 +259,19 @@ pub trait NonFungibleTokens {
 			let miner=self.get_token_miner(i);
 
 			if (owner_filter == Address::zero() || owner_filter == owner) && (miner_filter == Address::zero() || miner_filter == miner) {
-				let mut item=token.price.to_bytes_be();
-				for _i in 0..4 {item.push(sep);}
+				let mut item:Vec<u8>=Vec::new();
 
+				//On commence par inscrire la taille de token_price, uri
+				//doc sur le conversion :https://docs.rs/elrond-wasm/0.10.3/elrond_wasm/
+				item.append(&mut token.uri.len().to_be_bytes().to_vec());
+
+				//Puis on ajoute les informations
+				item.append(&mut token.price.to_bytes_be_pad_right(10).unwrap_or(Vec::new()));
 				item.append(&mut owner.to_vec());
 				item.push(token.state);
-				item.append(&mut token.uri);
 
-				//Separator
-				for _i in 0..4 {item.push(cr);}
+				item.append(&mut i.to_be_bytes().to_vec());
+				item.append(&mut token.uri);
 
 				rc.push(item);
 			}

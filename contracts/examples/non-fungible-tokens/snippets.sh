@@ -12,8 +12,11 @@ ADDRESS=$(erdpy data load --key=address)
 DEPLOY_TRANSACTION=$(erdpy data load --key=deployTransaction)
 ARGUMENTS=""
 
-PROXY=https://testnet-api.elrond.com
-CHAINID="T"
+#PROXY=https://testnet-api.elrond.com
+#CHAINID="T"
+
+PROXY=https://devnet-api.elrond.com
+CHAINID="D"
 
 #PROXY=http://161.97.75.165:7950
 #CHAINID="local-testnet"
@@ -32,9 +35,9 @@ deploy() {
     erdpy data store --key=deployTransaction --value=${TRANSACTION}
 
     echo "si besoin https://testnet-wallet.elrond.com"
-    echo "Transaction https://testnet-explorer.elrond.com/transactions/${TRANSACTION}"
+    echo "Transaction https://devnet-explorer.elrond.com/transactions/${TRANSACTION}"
     echo "Transaction ${PROXY}/transaction/${TRANSACTION}"
-    echo "Smart contract address: https://testnet-explorer.elrond.com/address/${ADDRESS}"
+    echo "Smart contract address: https://devnet-explorer.elrond.com/address/${ADDRESS}"
     echo "Smart contract address: ${PROXY}/address/${ADDRESS}"
 }
 
@@ -50,7 +53,8 @@ build(){
 mint(){
   clear
   echo "Minage du token"
-  ARGUMENTS="1 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 0xaaaaaaaaaa 0xabababab 10"
+  #mint(count: u64, new_token_owner: Address, new_token_uri: &Vec<u8>,secret: &Vec<u8>, new_token_price: BigUint)
+  ARGUMENTS="1 0x0139472eff6886771a982f3083da5d421f24c29181e63888228dc81ca60d69e1 0xaaaaaaaaaa 0xabababab 0xffffff"
   erdpy contract call ${ADDRESS} --chain ${CHAINID} --proxy ${PROXY} --recall-nonce --pem=${ALICE} --arguments ${ARGUMENTS} --gas-limit=80000000 --function="mint" --send
 }
 
@@ -73,10 +77,13 @@ setstate(){
 infos(){
   clear
 
-#  echo ""
-#  echo "Contract owner"
-#  erdpy contract query ${ADDRESS}  --proxy ${PROXY} --function="contractOwner"
-#
+  echo ""
+  echo "contract ${ADDRESS}"
+
+  echo ""
+  echo "Contract owner"
+  erdpy contract query ${ADDRESS}  --proxy ${PROXY} --function="contractOwner"
+
   echo ""
   echo "total minted"
   erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="totalMinted"
@@ -88,7 +95,7 @@ infos(){
 #  echo ""
 #  echo "TokenOwner sur 0"
 #  erdpy contract query ${ADDRESS} --proxy ${PROXY} --function="tokenOwner" --arguments 0
-  ARGUMENTS="170 255 0x0139472eff6886771a982f3083da5d431f24c29181e63888228dc81ca60d69e1 0x0000000000000000000000000000000000000000000000000000000000000000"
+  ARGUMENTS="0x0000000000000000000000000000000000000000000000000000000000000000 0x0000000000000000000000000000000000000000000000000000000000000000"
   #ARGUMENTS="170 255 0x0 0x0"
   echo ""
   echo "recuperation des tokens sur ${ADDRESS}"
@@ -117,6 +124,13 @@ checkDeployment() {
     echo "Vérification du déploiement sur ${PROXY}"
     erdpy tx get --proxy ${PROXY} --hash=$DEPLOY_TRANSACTION --omit-fields="['data', 'signature']"
     erdpy account get --proxy ${PROXY} --address=$ADDRESS --omit-fields="['code']"
+}
+
+
+_test() {
+  deploy
+  mint
+  infos
 }
 
 

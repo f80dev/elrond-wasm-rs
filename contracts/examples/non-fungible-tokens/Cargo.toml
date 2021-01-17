@@ -11,16 +11,19 @@ path = "src/lib.rs"
 wasm-output-mode = [ "elrond-wasm-node",]
 
 [dependencies.elrond-wasm]
-version = "0.10.3"
+version = "0.10.4"
 
 [dependencies.elrond-wasm-derive]
-version = "0.10.3"
+version = "0.10.4"
 
 [dependencies.elrond-wasm-node]
-version = "0.10.3"
+version = "0.10.4"
 optional = true
 
 [dev-dependencies.elrond-wasm-debug]
-version = "0.10.3"
+version = "0.10.4"
+
+[dependencies.rust-crypto-wasm]
+version = "0.3.1"
 
 
